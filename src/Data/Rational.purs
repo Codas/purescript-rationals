@@ -7,10 +7,12 @@ module Data.Rational
   ) where
 
 import Prelude
-import Data.Int as Int
-import Data.Ratio (Ratio(Ratio), gcd)
+import Data.Function.Uncurried (Fn2 (), runFn2)
+import Data.BigInt (BigInt ())
+import Data.BigInt as BigInt
+import Data.Ratio (Ratio(Ratio))
 
-newtype Rational = Rational (Ratio Int)
+newtype Rational = Rational (Ratio BigInt)
 
 instance showRational :: Show Rational where
   show (Rational (Ratio a b)) = show a <> " % " <> show b
@@ -43,26 +45,29 @@ instance euclideanRingRational :: EuclideanRing Rational where
 
 instance fieldRational :: Field Rational
 
-infixl 7 rational as %
 
 rational :: Int -> Int -> Rational
-rational x y = reduce $ Rational $ Ratio x y
+rational x y = reduce $ Rational $ Ratio (BigInt.fromInt x) (BigInt.fromInt y)
+infixl 7 rational as %
 
 toNumber :: Rational -> Number
-toNumber (Rational (Ratio a b)) = Int.toNumber a / Int.toNumber b
+toNumber (Rational (Ratio a b)) = BigInt.toNumber a / BigInt.toNumber b
 
 fromInt :: Int -> Rational
-fromInt i = Rational $ Ratio i 1
+fromInt i = Rational $ Ratio (BigInt.fromInt i) (BigInt.fromInt 1)
+
+fromBigInt :: BigInt -> Rational
+fromBigInt i = Rational $ Ratio i (BigInt.fromInt 1)
 
 reduce :: Rational -> Rational
-reduce (Rational ratio@(Ratio a b)) =
-  let x = a / gcd ratio
-      y = b / gcd ratio
-  in Rational $ Ratio (x * signum y) (abs y)
+reduce (Rational (Ratio a b)) =
+  let x = a / g
+      y = b / g
+      g = gcd a b
+  in Rational $ Ratio (x * signum y) (BigInt.abs y)
 
-signum :: Int -> Int
-signum 0 = 0
-signum x' | x' < 0 = -1
-signum _ = 1
+gcd :: BigInt -> BigInt -> BigInt
+gcd a b = runFn2 js_gcd a b
 
-foreign import abs :: Int -> Int
+foreign import signum :: BigInt -> BigInt
+foreign import js_gcd :: Fn2 BigInt BigInt BigInt

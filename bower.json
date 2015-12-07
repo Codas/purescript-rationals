@@ -1,6 +1,6 @@
 {
   "name": "purescript-rationals",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -13,7 +13,9 @@
     "output"
   ],
   "dependencies": {
-    "purescript-integers": "^1.0.0"
+    "purescript-integers": "^1.0.0",
+    "purescript-bigints": "^1.0.0",
+    "purescript-functions": "^1.0.0"
   },
   "devDependencies": {
     "purescript-console": "^1.0.0",
